@@ -23,5 +23,15 @@
     <string name="resetGame">"Reset Game"</string>
     <string name="player_one">Player One</string>
     <string name="player_two">Player Two</string>
+    <string name="id">ID</string>
+    <string name="send_request">Send Request</string>
+    <string name="accept_request">Accept Request</string>
+    <string name="authFailure">Authentication failed.</string>
+    <string name="title_activity_menu">MenuActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
 
 </resources>
