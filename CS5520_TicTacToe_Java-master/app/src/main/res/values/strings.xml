@@ -1,0 +1,27 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">TicTacToe Java</string>
+
+    <string name="playerOneMark" tools:ignore="MissingTranslation">X</string>
+    <string name="playerTwoMark">O</string>
+
+    <string name="playerOneMessage">"Player One Wins!"</string>
+    <string name="playerTwoMessage">"Player Two Wins!"</string>
+
+    <string name="playerOneId">"PLAYER1"</string>
+    <string name="playerTwoId">"PLAYER2"</string>
+    <string name="drawMessage">"Its a draw!"</string>
+    <string name="newGameMessage">"Lets start the game"</string>
+    <string name="finished">"Finished"</string>
+
+
+    <string name="playerOneIsWinningMessage">"Player 1 is winning"</string>
+    <string name="playerTwoIsWinningMessage">"Player 2 is winning"</string>
+
+    <string name="X">"X"</string>
+    <string name="O">"O"</string>
+
+    <string name="resetGame">"Reset Game"</string>
+    <string name="player_one">Player One</string>
+    <string name="player_two">Player Two</string>
+
+</resources>

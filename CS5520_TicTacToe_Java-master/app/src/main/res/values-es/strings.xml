@@ -1,0 +1,17 @@
+<resources>
+<string name = "app_name"> </string>
+
+     <string name = "playerOneMessage"> "¡El jugador uno gana!" </string>
+     <string name = "playerTwoMessage"> "¡El jugador dos gana!" </string>
+     <string name = "drawMessage"> "¡Es un empate!" </string>
+     <string name = "newGameMessage"> "Comencemos el juego" </string>
+     <string name = "finished"> "Finalizado" </string>
+
+
+     <string name = "playerOneIsWinningMessage"> "El jugador 1 está ganando" </string>
+     <string name = "playerTwoIsWinningMessage"> "El jugador 2 está ganando" </string>
+
+  <string name = "resetGame"> "Restablecer juego" </string>
+     <string name = "player_one"> Jugador uno </string>
+     <string name = "player_two"> Jugador dos </string>
+	 </resources>

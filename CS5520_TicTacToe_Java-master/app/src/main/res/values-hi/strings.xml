@@ -1,0 +1,17 @@
+<resources>
+<string name ="app_name">"टिक टैक् टो"</string>
+
+     <string name = "playerOneMessage"> "खिलाड़ी एक जीत!" </string>
+     <string name = "playerTwoMessage"> "खिलाड़ी दो जीत!" </string>
+     <string name = "drawMessage"> "इसका एक ड्रा!" </string>
+     <string name = "newGameMessage"> "खेल शुरू करें" </string>
+     <string name = "finished"> "समाप्त" </string>
+
+
+     <string name = "playerOneIsWinningMessage"> "प्लेयर 1 जीत रहा है" </string>
+     <string name = "playerTwoIsWinningMessage"> "प्लेयर 2 जीत रहा है" </string>
+
+  <string name = "resetGame"> "रीसेट गेम" </string>
+     <string name = "player_one"> प्लेयर एक </string>
+     <string name = "player_two"> प्लेयर दो </string>
+</resources>
