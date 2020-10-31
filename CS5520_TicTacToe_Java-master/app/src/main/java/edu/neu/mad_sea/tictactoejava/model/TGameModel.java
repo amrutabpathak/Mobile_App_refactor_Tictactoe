@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.Arrays;
 
+import edu.neu.mad_sea.tictactoejava.MainActivityController;
 import edu.neu.mad_sea.tictactoejava.bean.Game;
 import edu.neu.mad_sea.tictactoejava.bean.Player;
 import edu.neu.mad_sea.tictactoejava.util.Constants;
@@ -62,19 +63,27 @@ public class TGameModel {
     }
 
     public void setGameStates(){
+
+
         String cellId = game.getCellId();
         if(cellId == null){
             return;
         }
         int gameStatePointer = Integer.parseInt(cellId.substring(cellId.length()-1, cellId.length()));
-
+        int playerIndicator = 2;
         // Player markings depending on turn.
         if(game.isFirstPlayer()) {
+            playerIndicator = Constants.PLAYER_ONE_INDICATOR;
             gameState[gameStatePointer] = Constants.PLAYER_ONE_INDICATOR;
         }
         else{
+            playerIndicator= Constants.PLAYER_TWO_INDICATOR;
             gameState[gameStatePointer] = Constants.PLAYER_TWO_INDICATOR;
         }
+
+        MainActivityController.getMyRef().child("playing").child(MainActivityController.getPlayerSession()).child("game").child("block:"+gameStatePointer).setValue(MainActivityController.getUserName());
+        MainActivityController.getMyRef().child("playing").child(MainActivityController.getPlayerSession()).child("turn").setValue(MainActivityController.getOtherPlayer());
+
         Log.d(TAG, "setGameStates: "+ Arrays.toString(gameState));
         Log.d(TAG, "setGameStates: count "+game.getCount());
 

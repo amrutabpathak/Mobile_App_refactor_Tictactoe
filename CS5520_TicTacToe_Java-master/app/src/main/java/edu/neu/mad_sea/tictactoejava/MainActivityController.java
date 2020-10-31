@@ -12,6 +12,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.neu.mad_sea.tictactoejava.bean.Game;
 import edu.neu.mad_sea.tictactoejava.bean.Player;
 import edu.neu.mad_sea.tictactoejava.model.TGameModel;
@@ -35,6 +44,74 @@ public class MainActivityController extends FragmentActivity implements  StatusF
      *    - buttons: nine game piece buttons
      *    - resetGame: button used to reset the entire game, player scores, and playerStatus
      */
+
+    private static FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+    public static FirebaseDatabase getDatabase() {
+        return database;
+    }
+
+    public static void setDatabase(FirebaseDatabase database) {
+        MainActivityController.database = database;
+    }
+
+    public static DatabaseReference getMyRef() {
+        return myRef;
+    }
+
+    public static void setMyRef(DatabaseReference myRef) {
+        MainActivityController.myRef = myRef;
+    }
+
+    private static DatabaseReference myRef = database.getReference();
+
+    private static String playerSession = "";
+    private static String userName = "";
+
+    public static String getPlayerSession() {
+        return playerSession;
+    }
+
+    public static void setPlayerSession(String playerSession) {
+        MainActivityController.playerSession = playerSession;
+    }
+
+    public static String getUserName() {
+        return userName;
+    }
+
+    public static void setUserName(String userName) {
+        MainActivityController.userName = userName;
+    }
+
+    public static String getOtherPlayer() {
+        return otherPlayer;
+    }
+
+    public static void setOtherPlayer(String otherPlayer) {
+        MainActivityController.otherPlayer = otherPlayer;
+    }
+
+    public static String getLoginUID() {
+        return loginUID;
+    }
+
+    public static void setLoginUID(String loginUID) {
+        MainActivityController.loginUID = loginUID;
+    }
+
+    public static String getRequestType() {
+        return requestType;
+    }
+
+    public static void setRequestType(String requestType) {
+        MainActivityController.requestType = requestType;
+    }
+
+    private static String otherPlayer = "";
+    private static String loginUID = "";
+    private static String requestType = "";
+
     private static final String TAG = "MainActivityController";
     private TextView playerOneScore, playerTwoScore, playerStatus;
 
@@ -72,6 +149,13 @@ public class MainActivityController extends FragmentActivity implements  StatusF
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        userName = getIntent().getExtras().get("user_name").toString();
+        loginUID = getIntent().getExtras().get("login_uid").toString();
+        otherPlayer = getIntent().getExtras().get("other_player").toString();
+        requestType = getIntent().getExtras().get("request_type").toString();
+        playerSession = getIntent().getExtras().get("player_session").toString();
+
+
         FragmentManager manager = getSupportFragmentManager();
          boardFragment = (BoardFragment) manager.findFragmentById(R.id.board_fragment);
 
@@ -86,6 +170,69 @@ public class MainActivityController extends FragmentActivity implements  StatusF
         Log.d(TAG, "onCreate: Buttons created");*/
         MainActivityController.game = new Game(GameStatusEnum.START,0, FinalState.NONE,"", "", new Player(Constants.PLAYER_ONE_ID,0), new Player(Constants.PLAYER_TWO_ID,0), true);
         model = new TGameModel(MainActivityController.game);
+
+        myRef.child(String.valueOf(R.string.Playing)).child(playerSession).child("turn").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                try{
+                    String value = (String) dataSnapshot.getValue();
+                    if(value.equals(userName)) {
+                        game.setFirstPlayer(true);
+
+
+                    }else if(value.equals(otherPlayer)){
+                        game.setFirstPlayer(false);
+                    }
+
+                    boardFragment.dataChangedForTurn();
+                    statusFragment.dataChangedForTurn();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        myRef.child("playing").child(playerSession).child("game").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        try{
+
+
+                           /* Player1.clear();
+                            Player2.clear();
+                            activePlayer = 2;*/
+                            Map<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                            if(map != null){
+                                String value = "";
+                                String firstPlayer = userName;
+                                for(String key:map.keySet()){
+                                    value = (String) map.get(key);
+                                    if(value.equals(userName)){
+                                        game.setFirstPlayer(true);
+                                    }else{
+                                        game.setFirstPlayer(false);
+                                    }
+                                    firstPlayer = value;
+                                    boardFragment.dataChangedForGame();
+                                }
+                            }
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+
+                    }
+                });
+    }
+
       /*  boardFragment.setGame(game, model);
         statusFragment.setGame(game,model);*/
 
@@ -97,7 +244,9 @@ public class MainActivityController extends FragmentActivity implements  StatusF
             buttons[i] = (Button) findViewById(resourceID);
             buttons[i].setOnClickListener((View.OnClickListener) this);
         } */
-    }
+
+
+
 
     //@Override
     /*public void onClick1(View v) {

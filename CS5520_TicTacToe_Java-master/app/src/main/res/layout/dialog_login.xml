@@ -12,6 +12,8 @@
         android:ems="10"
         android:inputType="textEmailAddress"
         android:hint="Email"
+        android:textColorHint="#000000"
+
         />
 
     <EditText

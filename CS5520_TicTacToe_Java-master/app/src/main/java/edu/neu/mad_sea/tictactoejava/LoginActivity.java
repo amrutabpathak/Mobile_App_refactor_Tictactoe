@@ -1,22 +1,29 @@
 package edu.neu.mad_sea.tictactoejava;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.nfc.Tag;
+import android.content.Intent;;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -24,22 +31,18 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.w3c.dom.Text;
+
 
 public class LoginActivity extends AppCompatActivity {
-    private static final String TAG = "LoginActivity";
+
     ListView lv_loginUsers;
     ArrayList<String> list_loginUsers = new ArrayList<String>();
     ArrayAdapter adpt;
@@ -55,15 +58,14 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
-    // Write a message to the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("message");
+    DatabaseReference myRef = database.getReference();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Log.d(TAG, "onCreate: in create Login Activity.");
 
         tvSendRequest = (TextView) findViewById(R.id.tvSendRequest);
         tvAcceptRequest = (TextView) findViewById(R.id.tvAcceptRequest);
@@ -71,8 +73,8 @@ public class LoginActivity extends AppCompatActivity {
         tvSendRequest.setText("Please wait...");
         tvAcceptRequest.setText("Please wait...");
 
-        mAuth = FirebaseAuth.getInstance();
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        mAuth = FirebaseAuth.getInstance();
 
         lv_loginUsers = (ListView) findViewById(R.id.lv_loginUsers);
         adpt = new ArrayAdapter(this, android.R.layout.simple_list_item_1, list_loginUsers);
@@ -87,20 +89,20 @@ public class LoginActivity extends AppCompatActivity {
         tvUserID = (TextView) findViewById(R.id.tvLoginUser);
 
 
+
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
-                Log.d(TAG, "onAuthStateChanged: user "+user);
                 if (user != null) {
                     // User is signed in
                     LoginUID = user.getUid();
+                    Log.d("Auth", "onAuthStateChanged:signed_in:" + LoginUID);
                     LoginUserID = user.getEmail();
                     tvUserID.setText(LoginUserID);
                     UserName = convertEmailToString(LoginUserID);
-                    Log.d("Auth", "onAuthStateChanged:signed_in:" + LoginUID +"   "+UserName);
                     UserName = UserName.replace(".", "");
-                    Log.d(TAG, "onAuthStateChanged: "+UserName);
                     myRef.child("users").child(UserName).child("request").setValue(LoginUID);
                     reqUsersAdpt.clear();
                     AcceptIncommingRequests();
@@ -111,145 +113,86 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         };
-        // Read from the database
-        myRef.addValueEventListener(new ValueEventListener() {
+
+
+
+        myRef.getRoot().child("users").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                String value = dataSnapshot.getValue(String.class);
-                Log.d(TAG, "Value is: " + value);
+                updateLoginUsers(dataSnapshot);
             }
-
-            void AcceptIncommingRequests(){
-                myRef.child("users").child(UserName).child("request")
-                        .addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                try{
-                                    HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                                    if(map != null){
-                                        String value = "";
-                                        for(String key:map.keySet()){
-                                            value = (String) map.get(key);
-                                            reqUsersAdpt.add(convertEmailToString(value));
-                                            reqUsersAdpt.notifyDataSetChanged();
-                                            myRef.child("users").child(UserName).child("request").setValue(LoginUID);
-                                        }
-                                    }
-                                }catch (Exception e){
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError error) {
-
-                            }
-                        });
-
-                myRef.getRoot().child("users").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        updateLoginUsers(dataSnapshot);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-                lv_loginUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        final String requestToUser = ((TextView)view).getText().toString();
-                        confirmRequest(requestToUser, "To");
-                    }
-                });
-
-
-
-                lv_requstedUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        final String requestFromUser = ((TextView)view).getText().toString();
-                        confirmRequest(requestFromUser, "From");
-                    }
-                });
-            }
-
-            public void updateLoginUsers(DataSnapshot dataSnapshot){
-                String key = "";
-                Set<String> set = new HashSet<>();
-                Iterator i = dataSnapshot.getChildren().iterator();
-
-                while(i.hasNext()){
-                    key = ((DataSnapshot) i.next()).getKey();
-                    if(!key.equalsIgnoreCase(UserName)) {
-                        set.add(key);
-                    }
-                }
-
-                adpt.clear();
-                adpt.addAll(set);
-                adpt.notifyDataSetChanged();
-                tvSendRequest.setText("Send request to");
-                tvAcceptRequest.setText("Accept request from");
-            }
-
-
-            void confirmRequest(final String OtherPlayer, final String reqType){
-                AlertDialog.Builder b = new AlertDialog.Builder(getApplicationContext());
-                LayoutInflater inflater = getLayoutInflater();
-                final View dialogView = inflater.inflate(R.layout.connect_player_dialog, null);
-                b.setView(dialogView);
-
-                b.setTitle("Start Game?");
-                b.setMessage("Connect with " + OtherPlayer);
-                b.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        myRef.child("users")
-                                .child(OtherPlayer).child("request").push().setValue(LoginUserID);
-                        if(reqType.equalsIgnoreCase("From")) {
-                            StartGame(OtherPlayer + ":" + UserName, OtherPlayer, "From");
-                        }else{
-                            StartGame(UserName + ":" + OtherPlayer, OtherPlayer, "To");
-                        }
-                    }
-                });
-                b.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                b.show();
-
-
-
-            }
-
-
-            void StartGame(String PlayerGameID, String OtherPlayer, String requestType){
-                myRef.child("playing").child(PlayerGameID).removeValue();
-                Intent intent = new Intent(getApplicationContext(), MainActivityController.class);
-                intent.putExtra("player_session", PlayerGameID);
-                intent.putExtra("user_name", UserName);
-                intent.putExtra("other_player", OtherPlayer);
-                intent.putExtra("login_uid", LoginUID);
-                intent.putExtra("request_type", requestType);
-                startActivity(intent);
-            }
-
 
             @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
+
+
+
+        lv_loginUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final String requestToUser = ((TextView)view).getText().toString();
+                confirmRequest(requestToUser, "To");
+            }
+        });
+
+
+
+        lv_requstedUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final String requestFromUser = ((TextView)view).getText().toString();
+                confirmRequest(requestFromUser, "From");
+            }
+        });
+    }
+
+
+
+    void confirmRequest(final String OtherPlayer, final String reqType){
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.connect_player_dialog, null);
+        b.setView(dialogView);
+
+        b.setTitle("Start Game?");
+        b.setMessage("Connect with " + OtherPlayer);
+        b.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                myRef.child("users")
+                        .child(OtherPlayer).child("request").push().setValue(LoginUserID);
+                if(reqType.equalsIgnoreCase("From")) {
+                    StartGame(OtherPlayer + ":" + UserName, OtherPlayer, "From");
+                }else{
+                    StartGame(UserName + ":" + OtherPlayer, OtherPlayer, "To");
+                }
+            }
+        });
+        b.setNegativeButton("Back", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        b.show();
+
+
+
+    }
+
+
+    void StartGame(String PlayerGameID, String OtherPlayer, String requestType){
+        myRef.child("playing").child(PlayerGameID).removeValue();
+        Intent intent = new Intent(getApplicationContext(), MainActivityController.class);
+        intent.putExtra("player_session", PlayerGameID);
+        intent.putExtra("user_name", UserName);
+        intent.putExtra("other_player", OtherPlayer);
+        intent.putExtra("login_uid", LoginUID);
+        intent.putExtra("request_type", requestType);
+        startActivity(intent);
     }
 
     private String convertEmailToString(String Email){
@@ -258,13 +201,14 @@ public class LoginActivity extends AppCompatActivity {
         return value;
     }
 
+
     void AcceptIncommingRequests(){
         myRef.child("users").child(UserName).child("request")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         try{
-                            Map<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                            HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
                             if(map != null){
                                 String value = "";
                                 for(String key:map.keySet()){
@@ -286,30 +230,59 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    public void updateLoginUsers(DataSnapshot dataSnapshot){
+        String key = "";
+        Set<String> set = new HashSet<String>();
+        Iterator i = dataSnapshot.getChildren().iterator();
+
+        while(i.hasNext()){
+            key = ((DataSnapshot) i.next()).getKey();
+            if(!key.equalsIgnoreCase(UserName)) {
+                set.add(key);
+            }
+        }
+
+        adpt.clear();
+        adpt.addAll(set);
+        adpt.notifyDataSetChanged();
+        tvSendRequest.setText("Send request to");
+        tvAcceptRequest.setText("Accept request from");
+    }
+
+
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
-    public void RegisterUser(String email, String password) {
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+
+    public void RegisterUser(String email, String password){
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(getApplicationContext(), R.string.authFailure,
+                        Log.d("Auth Complete", "createUserWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Auth failed",
                                     Toast.LENGTH_SHORT).show();
                         }
+
                     }
                 });
-
     }
 
     public void JoinOnlineGame() {
@@ -339,7 +312,4 @@ public class LoginActivity extends AppCompatActivity {
         });
         b.show();
     }
-
-
-
 }
