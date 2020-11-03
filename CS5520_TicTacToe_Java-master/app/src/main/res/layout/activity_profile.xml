@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileActivity">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="199dp"
+        tools:layout_editor_absoluteY="18dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:background="#2196F3">
+
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/username"
+            android:layout_width="232dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="50dp"
+            android:autoText="false"
+            android:ems="10"
+            android:gravity="center"
+            android:inputType="textEmailAddress"
+            android:textAlignment="center"
+            android:textColor="#00BCD4"
+            android:textColorHint="#00BCD4"
+            tools:hint="Email" />
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="231dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:textAlignment="center"
+            android:textColor="#00BCD4"
+            android:textColorHint="#00BCD4" />
+
+        <Button
+            android:id="@+id/signBtn"
+            android:layout_width="match_parent"
+            android:layout_height="61dp"
+            android:layout_gravity="bottom"
+            android:background="#03A9F4"
+            android:text="@string/profile"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
