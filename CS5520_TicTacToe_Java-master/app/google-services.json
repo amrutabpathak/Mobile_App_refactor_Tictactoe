@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1038214911904",
+    "firebase_url": "https://tictactoe-java-df5aa.firebaseio.com",
+    "project_id": "tictactoe-java-df5aa",
+    "storage_bucket": "tictactoe-java-df5aa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1038214911904:android:c439b0e136490032eff6c5",
+        "android_client_info": {
+          "package_name": "edu.neu.mad_sea.tictactoejava"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1038214911904-avqqjhnepu46renm17al2degjo7j4lgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAP5GI3sEPldHJp1k0_p90t1C4Cl3G1SMw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1038214911904-avqqjhnepu46renm17al2degjo7j4lgp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

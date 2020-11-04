@@ -22,7 +22,7 @@ import edu.neu.mad_sea.tictactoejava.util.Constants;
 public class StatusFragment extends Fragment {
 
     private static final String TAG = "StatusFragment";
-    private TextView playerOneScore, playerTwoScore, playerStatus;
+    private TextView playerOneScore, playerTwoScore, playerStatus, playerTurn ;
     private Button resetGame;
     private OnResetListener resetListener;
 
@@ -34,22 +34,19 @@ public class StatusFragment extends Fragment {
     }
 
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.status_fragment, container, false);
-
+        updateUser();
         // set and find IDs for TextViews and reset button
         playerOneScore = (TextView) view.findViewById(R.id.playerOneScore);
         playerTwoScore = (TextView) view.findViewById(R.id.playerTwoScore);
         playerStatus = (TextView) view.findViewById(R.id.playerStatus);
         resetGame = (Button) view.findViewById(R.id.resetGameId);
+        playerTurn = (TextView)view.findViewById(R.id.playerTurn);
         Log.d(TAG, "onCreateView: resetGame "+resetGame + playerStatus + playerOneScore);
         // Reset game
         resetGame.setOnClickListener(new View.OnClickListener() {
@@ -63,6 +60,18 @@ public class StatusFragment extends Fragment {
 
         // Inflate the layout for this fragment
         return view;
+    }
+
+    public void updateUser(){
+        if(MainActivityController.getRequestType().equals(Constants.FROM)){
+            //myGameSign = "0";
+           // playerTurn.setText(getString(R.string.yourTurn));
+            MainActivityController.getMyRef().child(getString(R.string.Playing)).child(MainActivityController.getPlayerSession()).child(getString(R.string.Turn)).setValue(MainActivityController.getUserName());
+        }else{
+            //myGameSign = "X";
+           // playerTurn.setText(MainActivityController.getOtherPlayer() + "\'s turn");
+            MainActivityController.getMyRef().child(getString(R.string.Playing)).child(MainActivityController.getPlayerSession()).child(getString(R.string.Turn)).setValue(MainActivityController.getOtherPlayer());
+        }
     }
 
 
@@ -109,7 +118,19 @@ public class StatusFragment extends Fragment {
         }
     }
 
+    public void dataChangedForTurn(){
+        if(MainActivityController.getGame().isFirstPlayer()){
+            playerTurn.setText(getString(R.string.yourTurn));
 
+        }else{
+            playerTurn.setText(MainActivityController.getOtherPlayer() + "\'s turn");
+
+        }
+    }
+
+    void dataChangedForGame(){
+
+    }
 
 
 }

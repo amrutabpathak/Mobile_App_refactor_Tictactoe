@@ -1,6 +1,7 @@
 package edu.neu.mad_sea.tictactoejava;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,34 +59,38 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         Log.d(TAG, "onClick: here!!!");
+        if(MainActivityController.getPlayerSession().length() <= 0) {
+            Log.d(TAG, "onClick: Here !!!");
+        }else {
 
-        String buttonID = v.getResources().getResourceEntryName((v.getId()));
 
-        MainActivityController.getGame().setCellId(buttonID);
-        Log.d(TAG, "onClick: buttonID is "+buttonID);
-        int resourceID = getResources().getIdentifier(buttonID, "id", getActivity().getPackageName());
-        ImageButton btn = (ImageButton) v.findViewById(resourceID);
-        btn.setEnabled(false);
-        Log.d(TAG, "onClick: clicked"+buttonID);
-        MainActivityController.getGame().setStatus(GameStatusEnum.IN_PROGRESS);
-        setButtonFeatures( v);
-        Log.d(TAG, "onClick: "+MainActivityController.getGame());
-        MainActivityController.setGame(MainActivityController.getModel().statusCheck(MainActivityController.getGame()));
+            String buttonID = v.getResources().getResourceEntryName((v.getId()));
 
-        if(MainActivityController.getGame().getStatus().equals(GameStatusEnum.FINISHED)){
-            String message = "";
-            if(MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)){
-                message =  getString(R.string.playerOneMessage);
-            }else if(MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)){
-                message =  getString(R.string.playerTwoMessage);
-            }else if(MainActivityController.getGame().getFinalState().equals(FinalState.DRAW)){
-                message =  getString(R.string.drawMessage);
+            MainActivityController.getGame().setCellId(buttonID);
+            Log.d(TAG, "onClick: buttonID is " + buttonID);
+            int resourceID = getResources().getIdentifier(buttonID, "id", getActivity().getPackageName());
+            ImageButton btn = (ImageButton) v.findViewById(resourceID);
+            btn.setEnabled(false);
+            Log.d(TAG, "onClick: clicked" + buttonID);
+            MainActivityController.getGame().setStatus(GameStatusEnum.IN_PROGRESS);
+            setButtonFeatures(v);
+            Log.d(TAG, "onClick: " + MainActivityController.getGame());
+            MainActivityController.setGame(MainActivityController.getModel().statusCheck(MainActivityController.getGame()));
+
+            if (MainActivityController.getGame().getStatus().equals(GameStatusEnum.FINISHED)) {
+                String message = "";
+                if (MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)) {
+                    message = getString(R.string.playerOneMessage);
+                } else if (MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)) {
+                    message = getString(R.string.playerTwoMessage);
+                } else if (MainActivityController.getGame().getFinalState().equals(FinalState.DRAW)) {
+                    message = getString(R.string.drawMessage);
+                }
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                playAgain();
+                gameFinishedListenerlistener.onGameOver();
             }
-            Toast.makeText(getActivity(),message, Toast.LENGTH_SHORT).show();
-            playAgain();
-            gameFinishedListenerlistener.onGameOver();
         }
-
     }
 
 
@@ -142,6 +147,24 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
             gameFinishedListenerlistener = (GameFinishedListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement GameFinishedListener");
+        }
+    }
+
+
+    void dataChangedForTurn(){
+
+        enableBoard(MainActivityController.getGame().isFirstPlayer());
+    }
+
+    void dataChangedForGame(){
+        this.onClick(view);
+    }
+    void enableBoard(boolean isEnabled){
+        for (int i = 0; i < buttons.length; i++) {
+            int resourceID = getResources().getIdentifier("btn_"+i, "id", getActivity().getPackageName());
+            buttons[i] = (ImageButton) view.findViewById(resourceID);
+            buttons[i].setEnabled(isEnabled);
+
         }
     }
 

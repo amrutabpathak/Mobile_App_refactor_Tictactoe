@@ -34,5 +34,8 @@ public class Constants {
     public static final String RESET_BOARD= "R";
     public static final String GAME_OVER = "O";
 
+    public static final String FROM= "From";
+    public static final String TO = "To";
+
 
 }

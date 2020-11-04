@@ -14,4 +14,9 @@
   <string name = "resetGame"> "Restablecer juego" </string>
      <string name = "player_one"> Jugador uno </string>
      <string name = "player_two"> Jugador dos </string>
-	 </resources>
+    <string name="id">ID</string>
+    <string name="send_request">Send Request</string>
+    <string name="accept_request">Accept Request</string>
+    <string name="authFailure">Authentication failed.</string>
+    <string name="yourTurn" />
+</resources>
