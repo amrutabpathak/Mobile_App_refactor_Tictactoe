@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,14 +21,20 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import edu.neu.mad_sea.tictactoejava.bean.ACTIONS;
 import edu.neu.mad_sea.tictactoejava.bean.Player;
+import edu.neu.mad_sea.tictactoejava.bean.Request;
 
 public class ListUsersActivity extends AppCompatActivity {
 
@@ -44,32 +51,20 @@ public class ListUsersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        database = FirebaseDatabase.getInstance();
+        initializeDB();
         initializeStorage();
+        receiveRequest();
+
         setContentView(R.layout.activity_list_users);
         initializeUI();
 
         loadTop5Users();
         setView();
-
-        receiveRequest();
     }
 
-    private void setView() {
-        Integer i = 1;
-
-        for ( Player player: players) {
-            if (i >= 5) {
-                break;
-            }
-            initializeOpponentId(i, player);
-            // initializeOpponentScore(i, player);
-            i++;
-        }
-
-        for (; i < 5; i++) {
-            initializeEmptyOpponent(i);
-        }
+    private void initializeDB() {
+        database = FirebaseDatabase.getInstance();
+        auth = FirebaseAuth.getInstance();
     }
 
     private void loadTop5Users() {
@@ -127,20 +122,23 @@ public class ListUsersActivity extends AppCompatActivity {
 
     }
 
-    private void initializeEmptyOpponent(Integer i) {
-        TextView user, score;
+    private void setView() {
+        Integer i = 1;
 
-        Integer id = getUserId(i);
+        for ( Player player: players) {
+            if (i >= 5) {
+                break;
+            }
+            initializeOpponentId(i, player);
+            initializeOpponentScore(i, player);
+            i++;
+        }
 
-        user = (TextView) findViewById(getUserId(i));
-        score = (TextView) findViewById(getScoreId(i));
-
-        user.setText("No User");
-        score.setText("0");
-
-        user.setClickable(false);
-        score.setClickable(false);
+        for (; i < 5; i++) {
+            initializeEmptyOpponent(i);
+        }
     }
+
 
     private void initializeOpponentId(Integer i, Player player) {
         TextView user;
@@ -161,8 +159,9 @@ public class ListUsersActivity extends AppCompatActivity {
     private void initializeOpponentScore(Integer i, Player player) {
         TextView score;
         player.getScore();
+        Log.d(TAG,"hiiii"+ i +"      "+new Integer(getScoreId(i)).toString());
         score = (TextView) findViewById(getScoreId(i));
-        score.setText(player.getScore());
+        score.setText(String.valueOf(player.getScore()));
 
         scoreToPlayer.put(getScoreId(i), player);
 
@@ -172,6 +171,22 @@ public class ListUsersActivity extends AppCompatActivity {
                 onScoreClick(v);
             }
         });
+    }
+
+
+    private void initializeEmptyOpponent(Integer i) {
+        TextView user, score;
+
+        Integer id = getUserId(i);
+
+        user = (TextView) findViewById(getUserId(i));
+        score = (TextView) findViewById(getScoreId(i));
+
+        user.setText("No User");
+        score.setText("0");
+
+        user.setClickable(false);
+        score.setClickable(false);
     }
 
     private void initializeStorage() {
@@ -196,10 +211,12 @@ public class ListUsersActivity extends AppCompatActivity {
         }
     }
 
-    private void createGameInDB(String gameId) {
+    private void createGameInDB(String gameId, String user, String opponent) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("games");
         ref.child(gameId).setValue("");
-
+        ref.child(gameId).child(hash(user)).setValue("");
+        ref.child(gameId).child(hash(opponent)).setValue("");
+        ref.child(gameId).child("result").setValue("");
     }
 
     private int getUserId(Integer i) {
@@ -232,73 +249,65 @@ public class ListUsersActivity extends AppCompatActivity {
         }
     }
 
-     enum ACTIONS {
-        SEND,
-        ACCEPTED
-    }
-
-    class Request {
-        ACTIONS action;
-        String sender;
-        String receiver;
-        String gameId;
-    }
     private void sendNotificationToUser(String id) {
+        String email = auth.getCurrentUser().getEmail();
         // Set value
         Request request = new Request();
         request.action = ACTIONS.SEND;
-        request.sender = auth.getCurrentUser().getEmail();
+        request.sender = email;
+        request.receiver = "";
         request.gameId = UUID.randomUUID().toString();
 
         Integer userReqQ = id.hashCode();
         DatabaseReference dbRef = database.getReference("requests");
+        Log.d(TAG, request.receiver.toString());
         dbRef.child(userReqQ.toString()).setValue(request);
+
+        Toast.makeText(this, "Sent an invite to user "+curateEmail(email)+". Game will start if the user accepts the invite. ",
+                Toast.LENGTH_SHORT).show();
     }
 
     private void receiveRequest() {
         Integer userReqQ = auth.getCurrentUser().getEmail().hashCode();
 
         DatabaseReference dbRef = database.getReference("requests");
-        dbRef.child(userReqQ.toString()).limitToLast(1).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                Log.w(TAG, dataSnapshot.getValue().toString());
-                String sender = (String) dataSnapshot.child("sender").getValue();
-                ACTIONS action = (ACTIONS) dataSnapshot.child("action").getValue();
-                String gameId = (String) dataSnapshot.child("gameId").getValue();
+        dbRef.child(userReqQ.toString()).addValueEventListener(new ValueEventListener() {
 
-                if (action == null || action.equals(ACTIONS.SEND)) {
-                    AskNotification(sender, gameId);
-                } else if (action.equals(ACTIONS.ACCEPTED)) {
-                    Player player = new Player(sender, 0);
-                    goToMainActivity(player, gameId);
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue()!=null) {
+                    String sender = (String) dataSnapshot.child("sender").getValue();
+                    ACTIONS action = ACTIONS.valueOf((String) dataSnapshot.child("action").getValue());
+                    String gameId = (String) dataSnapshot.child("gameId").getValue();
+                    String receiver = (String) dataSnapshot.child("receiver").getValue();
+
+                    if (action == null || action.equals(ACTIONS.SEND)) {
+                        AskNotification(sender, gameId);
+                    } else if (action.equals(ACTIONS.ACCEPTED)) {
+                        removeRequestFromDB(sender);
+                        Player player = new Player(receiver, 0);
+                        goToMainActivity(player, gameId);
+                    }
                 }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
+
         });
     }
 
+    private void removeRequestFromDB(String sender) {
+        DatabaseReference dbRef = database.getReference("requests");
+        dbRef.child(((Integer) sender.hashCode()).toString()).removeValue();
+    }
+
     private void AskNotification(final String sender, final String gameId) {
-        new AlertDialog.Builder(getApplicationContext())
+        final String user = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        new AlertDialog.Builder(ListUsersActivity.this)
                 .setTitle("Invite")
                 .setMessage("Player "+sender+" wants to start a game?")
 
@@ -306,8 +315,8 @@ public class ListUsersActivity extends AppCompatActivity {
                 // The dialog is automatically dismissed when a dialog button is clicked.
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        sendAcceptanceToSender(sender);
-                        createGameInDB(gameId);
+                        sendAcceptanceToSender(sender, gameId);
+                        createGameInDB(gameId, user, sender);
 
                         Player player = new Player(sender, 0);
                         goToMainActivity(player, gameId);
@@ -315,28 +324,39 @@ public class ListUsersActivity extends AppCompatActivity {
                 })
 
                 // A null listener allows the button to dismiss the dialog and take no further action.
-                .setNegativeButton(android.R.string.no, null)
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        DatabaseReference dbRef = database.getReference("requests");
+                        dbRef.child(((Integer) auth.getCurrentUser().getEmail().hashCode()).toString()).removeValue();
+                    }
+                })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
 
-    private void sendAcceptanceToSender(String sender) {
+    private void sendAcceptanceToSender(String sender, String gameId) {
 
         Request acceptanceRequest = new Request();
         acceptanceRequest.sender = sender;
         acceptanceRequest.receiver = auth.getCurrentUser().getEmail();
         acceptanceRequest.action = ACTIONS.ACCEPTED;
+        acceptanceRequest.gameId = gameId;
 
         DatabaseReference dbRef = database.getReference("requests");
+        dbRef.child(((Integer) acceptanceRequest.receiver.hashCode()).toString()).removeValue();
+
         Integer userReqQ = sender.hashCode();
         dbRef.child(userReqQ.toString()).setValue(acceptanceRequest);
     }
 
     private void goToMainActivity(Player player, String gameId) {
-        BoardFragment.GAMEID = gameId;
-        Intent mainActivitIntent = new Intent(this, MainActivityController.class);
-        mainActivitIntent.putExtra("opponent", player.getId());
-        startActivity(mainActivitIntent);
+        if (player != null && gameId != null && !gameId.isEmpty()) {
+            BoardFragment.GAMEID = gameId;
+            Intent mainActivitIntent = new Intent(this, MainActivityController.class);
+            mainActivitIntent.putExtra("opponent", player.getId());
+            startActivity(mainActivitIntent);
+        }
     }
 
     private void logOut() {
@@ -353,5 +373,21 @@ public class ListUsersActivity extends AppCompatActivity {
                 logOut();
             }
         });
+    }
+
+    private String curateEmail(String email) {
+        return email.split("@")[0];
+    }
+
+    private  String hash(String stringToHash) {
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        messageDigest.update(stringToHash.getBytes());
+        return (new String(messageDigest.digest())).replaceAll("[^a-zA-Z0-9]", "");
+
     }
 }

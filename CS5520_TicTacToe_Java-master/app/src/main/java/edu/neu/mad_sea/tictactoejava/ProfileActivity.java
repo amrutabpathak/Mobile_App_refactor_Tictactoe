@@ -1,8 +1,5 @@
 package edu.neu.mad_sea.tictactoejava;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,24 +8,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import edu.neu.mad_sea.tictactoejava.bean.Player;
-
-import static com.google.firebase.FirebaseError.ERROR_USER_NOT_FOUND;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -179,10 +175,21 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Prepare data
         Player p1 = new Player(email, 0);
-        UUID uuid = UUID.randomUUID();
 
         // Set value
         DatabaseReference db = database.getReference("scores");
-        db.child(uuid.toString()).setValue(p1);
+        db.child(hash(email)).setValue(p1);
+    }
+
+    private  String hash(String stringToHash) {
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        messageDigest.update(stringToHash.getBytes());
+        return (new String(messageDigest.digest())).replaceAll("[^a-zA-Z0-9]", "");
+
     }
 }

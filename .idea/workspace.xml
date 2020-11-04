@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3ef70984-e488-407f-b105-4bee355eba7e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/tictactoe.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/BoardFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/BoardFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/MainActivityController.java" beforeDir="false" afterPath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/MainActivityController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/NotificationService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/ProfileActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/ProfileActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/StatusFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/CS5520_TicTacToe_Java-master/app/src/main/java/edu/neu/mad_sea/tictactoejava/StatusFragment.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1jlzB2SBINdBkR3Hiabl0wEd8pB" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/CS5520_TicTacToe_Java-master" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3ef70984-e488-407f-b105-4bee355eba7e" name="Default Changelist" comment="" />
+      <created>1604393329516</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1604393329516</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="2334" y="174" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1604394333955">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2334" y="174" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1604394333955" />
+    <state x="2020" y="158" width="1200" height="800" key="AVDManager" timestamp="1604394372937">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2020" y="158" width="1200" height="800" key="AVDManager/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1604394372937" />
+    <state x="2400" y="312" key="FileChooserDialogImpl" timestamp="1604395497438">
+      <screen x="1920" y="0" width="1920" height="1040" />
+    </state>
+    <state x="2400" y="312" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1604395497438" />
+  </component>
+</project>

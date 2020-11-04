@@ -1,20 +1,16 @@
 package edu.neu.mad_sea.tictactoejava;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import edu.neu.mad_sea.tictactoejava.bean.Game;
 import edu.neu.mad_sea.tictactoejava.bean.Player;
@@ -68,7 +64,7 @@ public class MainActivityController extends FragmentActivity implements  StatusF
 
     private BoardFragment boardFragment;
     private StatusFragment statusFragment;
-    public Player opponent;
+    public String opponent;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +89,7 @@ public class MainActivityController extends FragmentActivity implements  StatusF
     private void initializeGame() {
 
         FirebaseUser user = auth.getCurrentUser();
-        String opponent = null;
+        opponent = null;
         if (getIntent().getExtras() != null) {
             opponent = getIntent().getExtras().getString("opponent");
         }
@@ -103,7 +99,7 @@ public class MainActivityController extends FragmentActivity implements  StatusF
         } else if (opponent == null) {
             gotoChooseOpponent();
         } else {
-            Log.d(TAG, "Going to initialize the game");
+            Log.d(TAG, "Initialize the game with "+opponent);
             MainActivityController.game = new Game(GameStatusEnum.START, 0, FinalState.NONE, "", "", new Player(user.getEmail(), 0), new Player(opponent, 0), true);
             model = new TGameModel(MainActivityController.game);
 

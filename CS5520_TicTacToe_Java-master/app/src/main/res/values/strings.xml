@@ -4,8 +4,8 @@
     <string name="playerOneMark" tools:ignore="MissingTranslation">X</string>
     <string name="playerTwoMark" tools:ignore="MissingTranslation">O</string>
 
-    <string name="playerOneMessage">"Player One Wins!"</string>
-    <string name="playerTwoMessage">"Player Two Wins!"</string>
+    <string name="playerOneMessage">You won!</string>
+    <string name="playerTwoMessage">"Better luck next time :( "</string>
 
     <string name="playerOneId" tools:ignore="MissingTranslation">"PLAYER1"</string>
     <string name="playerTwoId" tools:ignore="MissingTranslation">"PLAYER2"</string>

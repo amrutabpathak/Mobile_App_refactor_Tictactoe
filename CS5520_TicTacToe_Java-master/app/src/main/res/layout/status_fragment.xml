@@ -3,18 +3,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_weight="0.7"
     android:background="#2196F3"
-    android:gravity="center"
+    android:gravity="bottom"
     android:orientation="vertical"
     android:weightSum="2"
     tools:context=".MainActivityController">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        tools:background="#FFFFFF"
+        tools:layout_weight="0.4">
+
+        <TextView
+            android:id="@+id/playerStatus"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#2196F3"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_weight="0.9"
         android:orientation="horizontal"
         android:weightSum="2">
+
+
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -88,7 +110,7 @@
         android:orientation="horizontal"
         android:weightSum="2"
         tools:background="#FFFFFF"
-        tools:layout_weight="1">
+        tools:layout_weight="0.7">
 
         <Button
             android:id="@+id/logOut"
@@ -114,7 +136,7 @@
             android:text="@string/resetGame"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
     </LinearLayout>
 
 </LinearLayout>

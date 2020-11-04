@@ -1,7 +1,6 @@
 package edu.neu.mad_sea.tictactoejava;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,18 +9,21 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import edu.neu.mad_sea.tictactoejava.bean.Game;
-import edu.neu.mad_sea.tictactoejava.bean.Player;
-import edu.neu.mad_sea.tictactoejava.model.TGameModel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import edu.neu.mad_sea.tictactoejava.util.Constants;
 
 public class StatusFragment extends Fragment {
@@ -33,8 +35,6 @@ public class StatusFragment extends Fragment {
     private OnLogOutListener logOutListener;
     private FirebaseAuth auth;
     private String opponent;
-
-
 
     public interface OnResetListener {
         public void onReset();
@@ -110,6 +110,7 @@ public class StatusFragment extends Fragment {
                 logOutListener.onLogOut();
             }
         });
+
     }
 
     private void initializeUI(View view) {
@@ -142,7 +143,7 @@ public class StatusFragment extends Fragment {
             playerTwoScoreStr = MainActivityController.getGame().getPlayerTwo().getScore()+"";
         }
         if(MainActivityController.getGame().getPlayerOne().getScore() > MainActivityController.getGame().getPlayerTwo().getScore()){
-            playerStatus.setText(R.string.playerOneIsWinningMessage);
+             playerStatus.setText(R.string.playerOneIsWinningMessage);
         }else if(MainActivityController.getGame().getPlayerOne().getScore() < MainActivityController.getGame().getPlayerTwo().getScore()){
             playerStatus.setText(R.string.playerTwoIsWinningMessage);
 
@@ -168,6 +169,49 @@ public class StatusFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("games");
+        final DatabaseReference scoresRef = FirebaseDatabase.getInstance().getReference("scores");
+
+        if(BoardFragment.GAMEID != null && dbRef.child(BoardFragment.GAMEID) != null && dbRef.child(BoardFragment.GAMEID).child("result") != null){
+            dbRef.child(BoardFragment.GAMEID).child("result").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    String email = (String) dataSnapshot.getValue();
+                    if (email.equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                        Integer score = Integer.valueOf(playerOneScore.getText().toString()) + 1;
+                        scoresRef.child(hash(email)).child("score").setValue(score);
+                        playerOneScore.setText(score.toString());
+                        playerStatus.setText(R.string.playerOneIsWinningMessage);
+
+                    } else {
+                        playerStatus.setText(R.string.playerTwoIsWinningMessage);
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+    }
+
+    private  String hash(String stringToHash) {
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        messageDigest.update(stringToHash.getBytes());
+        return (new String(messageDigest.digest())).replaceAll("[^a-zA-Z0-9]", "");
+
+    }
 
 
 

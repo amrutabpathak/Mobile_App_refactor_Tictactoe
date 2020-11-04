@@ -29,7 +29,6 @@
                 android:textSize="60sp"
                 android:textStyle="bold"
                 android:backgroundTint="#413F43"
-                app:layout_constraintTop_toBottomOf="@+id/playerStatus"
                 app:layout_constraintLeft_toLeftOf="parent"
                 android:layout_marginTop="15dp"
                 android:layout_marginLeft="3dp"

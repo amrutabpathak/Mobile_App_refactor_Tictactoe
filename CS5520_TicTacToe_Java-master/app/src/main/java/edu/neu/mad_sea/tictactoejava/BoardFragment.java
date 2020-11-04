@@ -1,6 +1,7 @@
 package edu.neu.mad_sea.tictactoejava;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,18 +12,19 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import edu.neu.mad_sea.tictactoejava.bean.Game;
-import edu.neu.mad_sea.tictactoejava.model.TGameModel;
 import edu.neu.mad_sea.tictactoejava.util.Constants;
 import edu.neu.mad_sea.tictactoejava.util.FinalState;
 import edu.neu.mad_sea.tictactoejava.util.GameStatusEnum;
@@ -56,6 +58,16 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
         // Inflate the layout for this fragment
         return view;
     }
+    @Override
+    public void onResume() {
+
+        super.onResume();
+        if(GAMEID != null){
+            setUpListenerForSelf();
+        }
+    }
+
+
 
     @Override
     public void onClick(View v) {
@@ -68,55 +80,49 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
         ImageButton btn = (ImageButton) v.findViewById(resourceID);
         btn.setEnabled(false);
 
-        Log.d(TAG, "onClick: clicked"+buttonID);
+
         MainActivityController.getGame().setStatus(GameStatusEnum.IN_PROGRESS);
-        setButtonFeatures(v);
-
-        setUpListenerForDb();
+        setButtonFeatures(btn, true);
         setGameStatusInDB(buttonID);
-
-        checkGameStatus();
+        checkGameStatus(true);
         freeze();
     }
 
     private void freeze() {
         for (int i=0; i < buttons.length; i++) {
             String buttonID = "btn_" + i;
-            Log.d(TAG, "onCreate: button"+buttonID);
+            Log.d(TAG, "onFreeze: button"+buttonID);
             int resourceID = getResources().getIdentifier(buttonID, "id",getActivity().getPackageName());
             buttons[i] = (ImageButton) view.findViewById(resourceID);
             buttons[i].setEnabled(false);
         }
     }
 
-    private void setUpListenerForDb() {
+    public void setUpListenerForSelf() {
+
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("games");
-
-        dbRef.child(GAMEID).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                String opponent = ((MainActivityController) getActivity()).opponent.getId();
-                String buttonCLicked = (String) dataSnapshot.child(GAMEID).child(opponent).getValue();
-                setButtonFeatures(getView());
-                unfreeze();
-            }
+    final String user = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        dbRef.child(GAMEID).child(hash(user)).addValueEventListener(new ValueEventListener() {
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                String opponent = ((MainActivityController) getActivity()).opponent.getId();
-                String buttonCLicked = (String) dataSnapshot.child(GAMEID).child(opponent).getValue();
-                setButtonFeatures(getView());
-                unfreeze();
-            }
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                if (user != null && !user.isEmpty()) {
+                    unfreeze();
+                    Log.w(TAG, user);
+                    Log.d(TAG, "hash user: "+hash(user));
+                    String buttonCLicked = (String) dataSnapshot.getValue();
+                    if (!buttonCLicked.isEmpty()) {
+                        Log.w(TAG, "Opp->"+buttonCLicked);
+                        Log.w(TAG, "Opp->"+getActivity().getPackageName());
+                        int resourceID = getResources().getIdentifier(buttonCLicked, "id", getActivity().getPackageName());
+                        ImageButton btn = (ImageButton) getView().findViewById(resourceID);
+                        btn.setEnabled(false);
+                        setButtonFeatures(btn, false);
+                    }
+                } else {
+                    goProfileActivity();
+                }
             }
 
             @Override
@@ -124,6 +130,11 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
 
             }
         });
+    }
+
+    private void goProfileActivity() {
+        Intent profileActivity = new Intent(getActivity(), ProfileActivity.class);
+        startActivity(profileActivity);
     }
 
     private void unfreeze() {
@@ -138,22 +149,37 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
 
     private void setGameStatusInDB(String buttonId) {
         String user = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        Log.w(TAG, "setGameStatusInDB User->"+user);
+        Log.w(TAG, String.valueOf(hash(user)));
+
+        final String opponent = ((MainActivityController) getActivity()).opponent;
+        Log.w(TAG, "setGameStatusInDB opponent->"+opponent);
+        Log.w(TAG, String.valueOf(hash(opponent)));
 
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("games");
-        dbRef.child(GAMEID).child(user).setValue(buttonId);
+        dbRef.child(GAMEID).child(hash(opponent)).setValue(buttonId);
     }
 
-    private void checkGameStatus() {
+    private void checkGameStatus(boolean turn) {
         MainActivityController.setGame(MainActivityController.getModel().statusCheck(MainActivityController.getGame()));
 
         if(MainActivityController.getGame().getStatus().equals(GameStatusEnum.FINISHED)){
             String message = "";
             if(MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)){
                 message =  getString(R.string.playerOneMessage);
-            }else if(MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)){
+            }else if(MainActivityController.getGame().getFinalState().equals(FinalState.TWO_WINS)){
                 message =  getString(R.string.playerTwoMessage);
             }else if(MainActivityController.getGame().getFinalState().equals(FinalState.DRAW)){
                 message =  getString(R.string.drawMessage);
+            }
+
+            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("games");
+            if (turn) {
+                String user = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                dbRef.child(GAMEID).child("result").setValue(user);
+            } else {
+                String opp = ((MainActivityController)getActivity()).opponent;
+                dbRef.child(GAMEID).child("result").setValue(opp);
             }
 
             Toast.makeText(getActivity(),message, Toast.LENGTH_SHORT).show();
@@ -175,13 +201,13 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void setButtonFeatures( View v) {
-
+    private void setButtonFeatures(ImageButton iB, boolean turn) {
+         MainActivityController.getGame().setFirstPlayer(turn);
         // Player markings depending on turn.
-        if (MainActivityController.getGame().isFirstPlayer()) {
-            ((ImageButton) v).setImageResource(R.drawable.xxxx);
+        if (turn) {
+            iB.setImageResource(R.drawable.xxxx);
         } else {
-            ((ImageButton) v).setImageResource(R.drawable.oooo);
+            iB.setImageResource(R.drawable.oooo);
         }
     }
 
@@ -203,6 +229,18 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement GameFinishedListener");
         }
+    }
+
+    private  String hash(String stringToHash) {
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        messageDigest.update(stringToHash.getBytes());
+        return (new String(messageDigest.digest())).replaceAll("[^a-zA-Z0-9]", "");
+
     }
 
 }
