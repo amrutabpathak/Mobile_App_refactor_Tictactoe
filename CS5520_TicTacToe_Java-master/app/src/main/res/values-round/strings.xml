@@ -1,3 +1,4 @@
 <resources>
     <string name="hello_world">Hello Round World!</string>
+    <string name="itsadrawMessage">Its a draw!</string>
 </resources>
