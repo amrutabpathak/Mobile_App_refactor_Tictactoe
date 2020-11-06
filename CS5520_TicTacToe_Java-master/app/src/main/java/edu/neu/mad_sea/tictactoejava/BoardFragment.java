@@ -76,7 +76,7 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
             String message = "";
             if(MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)){
                 message =  getString(R.string.playerOneMessage);
-            }else if(MainActivityController.getGame().getFinalState().equals(FinalState.ONE_WINS)){
+            }else if(MainActivityController.getGame().getFinalState().equals(FinalState.TWO_WINS)){
                 message =  getString(R.string.playerTwoMessage);
             }else if(MainActivityController.getGame().getFinalState().equals(FinalState.DRAW)){
                 message =  getString(R.string.drawMessage);
@@ -131,6 +131,7 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
             buttons[i] = (ImageButton) view.findViewById(resourceID);
             buttons[i].setEnabled(true);
             buttons[i].setImageResource(android.R.color.transparent);
+            buttons[i].setBackground(null);
 
         }
         }

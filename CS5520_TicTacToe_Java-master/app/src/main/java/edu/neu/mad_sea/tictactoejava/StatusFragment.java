@@ -19,6 +19,9 @@ import edu.neu.mad_sea.tictactoejava.bean.Game;
 import edu.neu.mad_sea.tictactoejava.model.TGameModel;
 import edu.neu.mad_sea.tictactoejava.util.Constants;
 
+import static edu.neu.mad_sea.tictactoejava.R.*;
+import static edu.neu.mad_sea.tictactoejava.R.string.*;
+
 public class StatusFragment extends Fragment {
 
     private static final String TAG = "StatusFragment";
@@ -43,7 +46,7 @@ public class StatusFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.status_fragment, container, false);
+        View view = inflater.inflate(layout.status_fragment, container, false);
 
         // set and find IDs for TextViews and reset button
         playerOneScore = (TextView) view.findViewById(R.id.playerOneScore);
@@ -72,6 +75,7 @@ public class StatusFragment extends Fragment {
 
         playerStatus.setText(Constants.NEW_GAME_MESSAGE);
         updateText(Constants.RESET_BOARD);
+        resetGame.setEnabled(true);
     }
 
     public void updateText(String status){
@@ -83,12 +87,17 @@ public class StatusFragment extends Fragment {
             playerTwoScoreStr = MainActivityController.getGame().getPlayerTwo().getScore()+"";
         }
         if(MainActivityController.getGame().getPlayerOne().getScore() > MainActivityController.getGame().getPlayerTwo().getScore()){
-            playerStatus.setText(R.string.playerOneIsWinningMessage);
+            playerStatus.setText(playerOneIsWinningMessage);
         }else if(MainActivityController.getGame().getPlayerOne().getScore() < MainActivityController.getGame().getPlayerTwo().getScore()){
-            playerStatus.setText(R.string.playerTwoIsWinningMessage);
+            playerStatus.setText(playerTwoIsWinningMessage);
 
         }else{
-            playerStatus.setText("");
+            if(status.equals(Constants.RESET_BOARD)){
+                playerStatus.setText(string.newGameMessage);
+            }else if(status.equals(Constants.GAME_OVER)){
+                playerStatus.setText(string.itsadrawMessage);
+
+            }
         }
 
         Log.d(TAG, "updateText: "+MainActivityController.getGame().getPlayerOne().getScore());
