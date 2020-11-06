@@ -18,4 +18,5 @@
     <string name="send_request">Send Request</string>
     <string name="accept_request">Accept Request</string>
     <string name="authFailure">Authentication failed.</string>
+    <string name="itsadrawMessage">Its a draw!</string>
 </resources>
